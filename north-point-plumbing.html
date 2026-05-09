@@ -1,0 +1,1504 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>North Point Plumbing LLC | Albany, Oregon</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300&family=Playfair+Display:ital,wght@0,700;1,400;1,600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+--bg:#060d18;--bg2:#091220;--bg3:#0d1a2e;--s1:#0f2035;--s2:#142840;
+--cop:#b8742a;--cop2:#d4913e;--cop3:#f0b054;--cop4:#ffc96e;
+--wat:#1e7fc4;--wat2:#3a9fd8;--ice:#d0e8f8;
+--tx:#eef4fc;--tx2:#b8cfe8;--mt:#6a90b8;--mt2:#3a5878;
+--bc:rgba(255,255,255,0.06);--bco:rgba(184,116,42,0.2);--bcw:rgba(30,127,196,0.2);
+--e:cubic-bezier(0.16,1,0.3,1);
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--tx);font-family:'Inter',sans-serif;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+
+/* ── LOADER ── */
+#loader{position:fixed;inset:0;z-index:9999;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;transition:opacity 0.8s,visibility 0.8s}
+#loader.out{opacity:0;visibility:hidden}
+.ld-logo{font-family:'Bebas Neue',sans-serif;font-size:52px;letter-spacing:0.08em;color:var(--tx);opacity:0;animation:ld-in 0.6s 0.3s var(--e) forwards}
+.ld-sub{font-size:12px;letter-spacing:0.2em;text-transform:uppercase;color:var(--mt);opacity:0;animation:ld-in 0.6s 0.55s var(--e) forwards}
+.ld-bar{width:220px;height:2px;background:var(--bc);border-radius:99px;overflow:hidden;opacity:0;animation:ld-in 0.4s 0.7s forwards}
+.ld-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--cop),var(--cop3));border-radius:99px;animation:ld-fill 1.6s 0.8s var(--e) forwards}
+@keyframes ld-in{to{opacity:1;transform:none}from{opacity:0;transform:translateY(16px)}}
+@keyframes ld-fill{to{width:100%}}
+
+/* ── CANVAS ── */
+#cv{position:fixed;inset:0;z-index:0;pointer-events:none}
+
+/* ── CURSOR ── */
+.cr,.crr{position:fixed;border-radius:50%;pointer-events:none;z-index:9990;transform:translate(-50%,-50%);transition-property:width,height,opacity;transition-duration:0.3s}
+.cr{width:10px;height:10px;background:var(--cop3);mix-blend-mode:screen}
+.crr{width:32px;height:32px;border:1px solid rgba(240,176,84,0.5);transition-duration:0.4s}
+
+/* ── PAGE ── */
+.page{position:relative;z-index:1}
+
+/* ── EMERGENCY BAR ── */
+.ebar{
+  background:linear-gradient(90deg,var(--cop) 0%,var(--cop2) 50%,var(--cop) 100%);
+  background-size:200% 100%;
+  animation:ebar-move 4s linear infinite;
+  padding:10px 60px;display:flex;align-items:center;justify-content:center;gap:16px;
+  font-size:13px;font-weight:600;letter-spacing:0.05em;color:#fff;position:relative;z-index:100;
+}
+@keyframes ebar-move{0%{background-position:0%}100%{background-position:200%}}
+.ebd{width:7px;height:7px;border-radius:50%;background:#fff;animation:ebd 1.4s infinite}
+@keyframes ebd{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.4;transform:scale(0.5)}}
+.ebar a{color:#fff;font-weight:800;text-decoration:underline}
+
+/* ── NAV ── */
+#nav{
+  position:fixed;top:36px;left:0;right:0;z-index:200;
+  padding:0 60px;display:flex;align-items:center;justify-content:space-between;
+  height:68px;transition:all 0.5s var(--e);
+}
+#nav.stuck{
+  top:0;
+  background:rgba(6,13,24,0.94);
+  backdrop-filter:blur(24px) saturate(180%);
+  border-bottom:1px solid var(--bco);
+  box-shadow:0 8px 40px rgba(0,0,0,0.4);
+}
+.nlogo{display:flex;align-items:center;gap:12px}
+.nmark{
+  width:44px;height:44px;border-radius:50%;
+  background:conic-gradient(var(--cop),var(--cop3),var(--cop));
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--bg);
+  box-shadow:0 0 24px rgba(184,116,42,0.5);
+  animation:nmark-spin 20s linear infinite;
+  flex-shrink:0;
+}
+@keyframes nmark-spin{to{box-shadow:0 0 24px rgba(184,116,42,0.5),0 0 0 1px rgba(184,116,42,0.15)}}
+.nname{display:flex;flex-direction:column;line-height:1.1}
+.nname-main{font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:0.06em}
+.nname-sub{font-size:9px;color:var(--cop3);letter-spacing:0.18em;text-transform:uppercase;font-weight:600}
+nav ul{display:flex;gap:30px;list-style:none}
+nav ul a{font-size:13px;color:var(--mt);font-weight:500;transition:color 0.2s;letter-spacing:0.02em;position:relative}
+nav ul a::after{content:'';position:absolute;bottom:-4px;left:0;right:0;height:1px;background:var(--cop3);transform:scaleX(0);transform-origin:left;transition:transform 0.3s var(--e)}
+nav ul a:hover{color:var(--tx)}
+nav ul a:hover::after{transform:scaleX(1)}
+.nr{display:flex;align-items:center;gap:14px}
+.nph{font-size:14px;font-weight:700;color:var(--cop4);transition:color 0.2s}
+.nph:hover{color:#fff}
+.ncta{
+  background:linear-gradient(135deg,var(--cop),var(--cop2));
+  color:#fff;border:none;padding:10px 22px;border-radius:8px;
+  font-family:'Inter',sans-serif;font-size:13px;font-weight:600;
+  cursor:pointer;transition:all 0.3s;letter-spacing:0.03em;
+  box-shadow:0 4px 20px rgba(184,116,42,0.35);
+}
+.ncta:hover{transform:translateY(-2px);box-shadow:0 8px 32px rgba(184,116,42,0.5)}
+
+/* ── HERO ── */
+#hero{
+  min-height:100vh;
+  display:flex;align-items:center;
+  padding:140px 60px 100px;
+  position:relative;overflow:hidden;
+}
+/* animated gradient mesh behind hero */
+.hmesh{
+  position:absolute;inset:0;pointer-events:none;overflow:hidden;
+}
+.hmesh-orb{position:absolute;border-radius:50%;filter:blur(100px)}
+.ho1{width:700px;height:700px;background:rgba(184,116,42,0.1);top:-200px;left:10%;animation:ho 14s ease-in-out infinite alternate}
+.ho2{width:600px;height:600px;background:rgba(30,127,196,0.08);bottom:-100px;right:0%;animation:ho 18s ease-in-out infinite alternate-reverse;animation-delay:-6s}
+.ho3{width:400px;height:400px;background:rgba(184,116,42,0.06);bottom:50px;left:50%;animation:ho 10s ease-in-out infinite alternate;animation-delay:-3s}
+@keyframes ho{from{transform:translate(0,0) scale(1)}to{transform:translate(30px,40px) scale(1.08)}}
+/* grid overlay */
+.hgrid{
+  position:absolute;inset:0;
+  background-image:linear-gradient(rgba(255,255,255,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.025) 1px,transparent 1px);
+  background-size:72px 72px;
+  mask-image:radial-gradient(ellipse 90% 70% at 50% 0,black 30%,transparent 100%);
+}
+.hero-inner{max-width:1300px;margin:0 auto;width:100%;position:relative;z-index:2}
+.hero-eyebrow{
+  display:inline-flex;align-items:center;gap:10px;
+  background:rgba(184,116,42,0.08);border:1px solid var(--bco);
+  border-radius:100px;padding:7px 18px;
+  font-size:11px;color:var(--cop3);letter-spacing:0.16em;text-transform:uppercase;font-weight:600;
+  margin-bottom:32px;
+  opacity:0;animation:up 0.9s 1.8s var(--e) forwards;
+}
+.heb-dot{width:6px;height:6px;border-radius:50%;background:var(--cop3);animation:ebd 2s infinite}
+.hero-h1{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:clamp(68px,10vw,140px);
+  letter-spacing:0.015em;line-height:0.88;
+  margin-bottom:10px;
+  opacity:0;animation:up 0.9s 1.95s var(--e) forwards;
+}
+.hero-h1 .l2{
+  display:block;
+  background:linear-gradient(90deg,var(--cop3),var(--cop4),var(--cop3));
+  background-size:200% 100%;
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  animation:grad-move 4s linear infinite;
+}
+@keyframes grad-move{0%{background-position:0%}100%{background-position:200%}}
+.hero-serif{
+  font-family:'Playfair Display',serif;font-style:italic;
+  font-size:clamp(17px,2.2vw,24px);color:var(--mt);
+  margin-bottom:30px;
+  opacity:0;animation:up 0.9s 2.1s var(--e) forwards;
+}
+.hero-body{
+  font-size:16px;color:var(--mt);max-width:520px;line-height:1.85;
+  font-weight:300;margin-bottom:42px;
+  opacity:0;animation:up 0.9s 2.22s var(--e) forwards;
+}
+.hero-body strong{color:var(--tx2);font-weight:500}
+.hbtns{
+  display:flex;gap:14px;flex-wrap:wrap;
+  opacity:0;animation:up 0.9s 2.34s var(--e) forwards;
+}
+.bp{
+  display:inline-flex;align-items:center;gap:10px;
+  background:linear-gradient(135deg,var(--cop),var(--cop2));
+  color:#fff;border:none;padding:17px 38px;border-radius:10px;
+  font-family:'Inter',sans-serif;font-size:15px;font-weight:600;
+  cursor:pointer;transition:all 0.35s var(--e);
+  box-shadow:0 8px 32px rgba(184,116,42,0.4);
+  position:relative;overflow:hidden;
+}
+.bp::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,var(--cop2),var(--cop3));opacity:0;transition:opacity 0.4s}
+.bp:hover::before{opacity:1}
+.bp:hover{transform:translateY(-3px);box-shadow:0 16px 48px rgba(184,116,42,0.55)}
+.bp span{position:relative;z-index:1}
+.bs{
+  display:inline-flex;align-items:center;gap:10px;
+  background:transparent;color:var(--tx2);
+  border:1px solid rgba(255,255,255,0.14);
+  padding:17px 38px;border-radius:10px;
+  font-family:'Inter',sans-serif;font-size:15px;font-weight:500;
+  cursor:pointer;transition:all 0.35s var(--e);
+}
+.bs:hover{background:rgba(255,255,255,0.04);border-color:rgba(255,255,255,0.26);transform:translateY(-2px)}
+.htrust{
+  display:flex;align-items:center;gap:20px;flex-wrap:wrap;
+  margin-top:36px;
+  opacity:0;animation:up 0.9s 2.46s var(--e) forwards;
+}
+.hti{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--mt)}
+.htdiv{width:1px;height:20px;background:var(--bc)}
+@keyframes up{from{opacity:0;transform:translateY(32px)}to{opacity:1;transform:none}}
+
+/* HERO FLOATING CARD */
+.hero-float{
+  position:absolute;right:60px;top:50%;transform:translateY(-50%);
+  width:340px;
+  opacity:0;animation:hf-in 1s 2.5s var(--e) forwards;
+}
+@keyframes hf-in{from{opacity:0;transform:translateY(-50%) translateX(40px)}to{opacity:1;transform:translateY(-50%) translateX(0)}}
+.hfcard{
+  background:rgba(13,26,46,0.85);
+  border:1px solid var(--bco);
+  border-radius:22px;padding:30px;
+  backdrop-filter:blur(20px);
+  box-shadow:0 32px 80px rgba(0,0,0,0.5),0 0 0 1px rgba(240,176,84,0.06),inset 0 1px 0 rgba(255,255,255,0.05);
+}
+.hfcard-top{display:flex;align-items:center;gap:14px;padding-bottom:22px;border-bottom:1px solid var(--bc);margin-bottom:22px}
+.hfav{
+  width:60px;height:60px;border-radius:50%;
+  background:linear-gradient(135deg,var(--cop),var(--cop3));
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Bebas Neue',sans-serif;font-size:26px;color:var(--bg);
+  box-shadow:0 0 28px rgba(184,116,42,0.5);flex-shrink:0;
+}
+.hfname{font-size:16px;font-weight:700;margin-bottom:3px}
+.hftitle{font-size:12px;color:var(--cop3);font-weight:500;letter-spacing:0.05em}
+.hfstars{color:#f59e0b;font-size:14px;letter-spacing:1px;margin-top:4px}
+.hfsvc{display:flex;flex-direction:column;gap:9px;margin-bottom:20px}
+.hfs{
+  display:flex;align-items:center;gap:10px;
+  padding:10px 13px;
+  background:rgba(255,255,255,0.03);border:1px solid var(--bc);
+  border-radius:9px;transition:all 0.3s;
+}
+.hfs:hover{background:rgba(184,116,42,0.06);border-color:var(--bco);transform:translateX(4px)}
+.hfs-ico{font-size:16px;width:24px;text-align:center;flex-shrink:0}
+.hfs-name{font-size:13px;font-weight:500;flex:1}
+.hfs-tag{font-size:9px;color:var(--cop3);background:rgba(184,116,42,0.1);border:1px solid rgba(184,116,42,0.2);padding:2px 8px;border-radius:100px;letter-spacing:0.06em}
+.hffoot{
+  background:linear-gradient(135deg,rgba(30,127,196,0.1),rgba(58,159,216,0.05));
+  border:1px solid var(--bcw);border-radius:10px;padding:13px 15px;
+  display:flex;align-items:center;gap:12px;
+}
+.hffoot-ico{font-size:20px}
+.hffoot-txt{font-size:12px;color:var(--mt);line-height:1.5}
+.hffoot-txt strong{display:block;color:var(--tx);font-size:13px;font-weight:600;margin-bottom:1px}
+
+/* scroll hint */
+.shint{
+  position:absolute;bottom:38px;left:60px;
+  display:flex;flex-direction:column;align-items:flex-start;gap:6px;
+  opacity:0;animation:up 0.9s 3s var(--e) forwards;z-index:2;
+}
+.shlbl{font-size:9px;letter-spacing:0.16em;text-transform:uppercase;color:var(--mt2)}
+.shln{width:1px;height:52px;background:linear-gradient(var(--cop3),transparent);animation:shl 2.2s ease-in-out infinite}
+@keyframes shl{0%,100%{opacity:0.3;transform:scaleY(0.5);transform-origin:top}60%{opacity:1;transform:scaleY(1)}}
+
+/* ── MARQUEE / TRUST BAR ── */
+.tbar{
+  position:relative;padding:0;overflow:hidden;
+  border-top:1px solid var(--bc);border-bottom:1px solid var(--bc);
+}
+.tbar::before,.tbar::after{
+  content:'';position:absolute;top:0;bottom:0;width:160px;z-index:2;
+}
+.tbar::before{left:0;background:linear-gradient(90deg,var(--bg),transparent)}
+.tbar::after{right:0;background:linear-gradient(-90deg,var(--bg),transparent)}
+.ttrack{display:flex;gap:80px;padding:26px 0;width:max-content;animation:tscroll 28s linear infinite}
+.ttrack:hover{animation-play-state:paused}
+.titem{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:0.08em;color:var(--mt2);white-space:nowrap;transition:color 0.3s;cursor:default}
+.titem:hover{color:var(--mt)}
+.tdot{color:var(--cop3);font-size:14px;align-self:center}
+@keyframes tscroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+/* ── STATS ── */
+#stats{padding:0;border-bottom:1px solid var(--bc)}
+.stats-grid{
+  max-width:1300px;margin:0 auto;padding:0 60px;
+  display:grid;grid-template-columns:repeat(4,1fr);
+  background:var(--bc);gap:1px;
+}
+.sitem{
+  background:var(--bg);padding:52px 40px;text-align:center;
+  position:relative;overflow:hidden;
+  opacity:0;transform:translateY(24px);
+  transition:all 0.8s var(--e);
+}
+.sitem::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,rgba(184,116,42,0.04),transparent);
+  opacity:0;transition:opacity 0.4s;
+}
+.sitem:hover::before{opacity:1}
+.sitem.vis{opacity:1;transform:none}
+.snum{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:clamp(52px,5vw,72px);letter-spacing:0.01em;line-height:1;
+  background:linear-gradient(135deg,var(--tx),var(--cop3));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.slbl{font-size:13px;color:var(--mt);margin-top:10px;letter-spacing:0.03em}
+
+/* ── 3D CANVAS SECTIONS ── */
+.cs{
+  min-height:100vh;display:flex;align-items:center;
+  padding:100px 60px;position:relative;
+}
+.csi{
+  max-width:1300px;margin:0 auto;width:100%;
+  display:grid;align-items:center;gap:80px;
+}
+.csi.l{grid-template-columns:1fr 1.1fr}
+.csi.r{grid-template-columns:1.1fr 1fr}
+.cst{max-width:540px}
+.stag{display:inline-block;font-size:11px;color:var(--cop3);letter-spacing:0.16em;text-transform:uppercase;font-weight:600;margin-bottom:16px}
+.stag::before{content:'⬡ ';opacity:0.5}
+.sh2{font-family:'Bebas Neue',sans-serif;font-size:clamp(44px,5.5vw,76px);letter-spacing:0.03em;line-height:0.93;margin-bottom:22px}
+.sh2 em{color:var(--cop3);font-style:normal}
+.ssub{font-size:16px;color:var(--mt);line-height:1.82;font-weight:300}
+
+/* reveal */
+.rv{opacity:0;transform:translateY(50px);transition:opacity 0.9s var(--e),transform 0.9s var(--e)}
+.rvl{opacity:0;transform:translateX(-50px);transition:opacity 0.9s var(--e),transform 0.9s var(--e)}
+.rvr{opacity:0;transform:translateX(50px);transition:opacity 0.9s var(--e),transform 0.9s var(--e)}
+.rv.vis,.rvl.vis,.rvr.vis{opacity:1;transform:none}
+.d1{transition-delay:0.1s!important}.d2{transition-delay:0.2s!important}.d3{transition-delay:0.3s!important}
+.d4{transition-delay:0.4s!important}.d5{transition-delay:0.5s!important}
+
+/* ── SERVICES ── */
+#svc{padding:120px 0}
+.svci{max-width:1300px;margin:0 auto;padding:0 60px}
+.svch{text-align:center;margin-bottom:72px}
+.svcg{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;background:var(--bc);border-radius:20px;overflow:hidden}
+.sc{
+  background:rgba(13,26,46,0.65);
+  padding:44px 38px;
+  transition:all 0.45s var(--e);
+  cursor:default;position:relative;overflow:hidden;
+}
+.sc::before{
+  content:'';position:absolute;bottom:0;left:0;right:0;height:3px;
+  background:linear-gradient(90deg,var(--cop),var(--cop3));
+  transform:scaleX(0);transform-origin:left;transition:transform 0.5s var(--e);
+}
+.sc::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(145deg,rgba(184,116,42,0.06),transparent);
+  opacity:0;transition:opacity 0.4s;
+}
+.sc:hover::before{transform:scaleX(1)}
+.sc:hover::after{opacity:1}
+.sc:hover{background:rgba(20,40,64,0.9);transform:translateY(-4px);box-shadow:0 24px 60px rgba(0,0,0,0.4),0 0 0 1px rgba(184,116,42,0.1)}
+.sc-ico{
+  width:58px;height:58px;border-radius:16px;
+  background:rgba(184,116,42,0.08);border:1px solid rgba(184,116,42,0.15);
+  display:flex;align-items:center;justify-content:center;font-size:26px;
+  margin-bottom:24px;transition:all 0.4s;position:relative;z-index:1;
+}
+.sc:hover .sc-ico{transform:scale(1.12) rotate(-6deg);background:rgba(184,116,42,0.16);box-shadow:0 8px 24px rgba(184,116,42,0.2)}
+.sc h3{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:0.05em;margin-bottom:14px;position:relative;z-index:1}
+.sc p{font-size:14px;color:var(--mt);line-height:1.75;margin-bottom:18px;position:relative;z-index:1}
+.sc ul{list-style:none;display:flex;flex-direction:column;gap:8px;position:relative;z-index:1}
+.sc ul li{font-size:13px;color:var(--mt);display:flex;gap:8px}
+.sc ul li::before{content:'→';color:var(--cop3);flex-shrink:0}
+.sc-link{display:inline-flex;align-items:center;gap:6px;margin-top:22px;font-size:13px;font-weight:600;color:var(--cop3);letter-spacing:0.04em;position:relative;z-index:1;transition:gap 0.25s}
+.sc:hover .sc-link{gap:10px}
+
+/* ── ABOUT / DERRICK ── */
+#about{padding:120px 0;position:relative}
+.about-grid{max-width:1300px;margin:0 auto;padding:0 60px;display:grid;grid-template-columns:1fr 1fr;gap:100px;align-items:center}
+.abio p{font-size:16px;color:var(--tx2);line-height:1.9;font-weight:300;margin-bottom:20px}
+.abio p strong{color:var(--tx);font-weight:500}
+.aquote{
+  margin:32px 0;padding:26px 30px;
+  background:rgba(184,116,42,0.05);border-left:3px solid var(--cop);border-radius:0 14px 14px 0;position:relative;
+}
+.aquote::before{
+  content:'"';position:absolute;top:-24px;left:16px;
+  font-family:'Playfair Display',serif;font-size:90px;color:var(--cop);opacity:0.25;line-height:1;
+}
+.aqt{font-family:'Playfair Display',serif;font-style:italic;font-size:17px;line-height:1.75;color:var(--tx2);margin-bottom:12px}
+.aqs{font-size:13px;color:var(--cop3);font-weight:600}
+.acreds{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:36px}
+.acred{background:rgba(13,26,46,0.7);border:1px solid var(--bc);border-radius:12px;padding:18px;transition:border-color 0.3s}
+.acred:hover{border-color:var(--bco)}
+.acred-ico{font-size:20px;margin-bottom:8px}
+.acred-v{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:0.05em;color:var(--cop3);margin-bottom:3px}
+.acred-l{font-size:12px;color:var(--mt)}
+/* derrick visual card */
+.dcard{
+  background:linear-gradient(145deg,rgba(14,28,50,0.9),rgba(9,18,32,0.95));
+  border:1px solid var(--bco);border-radius:24px;padding:38px;
+  box-shadow:0 40px 100px rgba(0,0,0,0.45),inset 0 1px 0 rgba(255,255,255,0.04);
+  position:relative;overflow:hidden;
+}
+.dcard::before{content:'';position:absolute;top:-80px;right:-80px;width:220px;height:220px;border-radius:50%;background:radial-gradient(circle,rgba(184,116,42,0.1),transparent 70%)}
+.dcTop{display:flex;align-items:center;gap:16px;padding-bottom:26px;border-bottom:1px solid var(--bc);margin-bottom:26px}
+.dcAv{
+  width:74px;height:74px;border-radius:50%;
+  background:linear-gradient(135deg,var(--cop),var(--cop3));
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Bebas Neue',sans-serif;font-size:32px;color:var(--bg);
+  box-shadow:0 0 32px rgba(184,116,42,0.5);flex-shrink:0;
+}
+.dcn{font-size:20px;font-weight:700;margin-bottom:3px}
+.dct{font-size:13px;color:var(--cop3);font-weight:500;letter-spacing:0.04em;margin-bottom:4px}
+.dcl{font-size:12px;color:var(--mt)}
+.dcstars{color:#f59e0b;font-size:15px;letter-spacing:1px;margin-top:4px}
+.dcstats{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--bc);border-radius:12px;overflow:hidden;margin-bottom:22px}
+.dcsi{background:rgba(255,255,255,0.025);padding:16px;text-align:center}
+.dcsn{font-family:'Bebas Neue',sans-serif;font-size:28px;color:var(--cop3);letter-spacing:0.03em}
+.dcsl{font-size:11px;color:var(--mt);margin-top:2px}
+.dcsvcs{display:flex;flex-direction:column;gap:8px}
+.dcsvc{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--tx2);padding:9px 12px;background:rgba(255,255,255,0.025);border:1px solid var(--bc);border-radius:8px}
+.dcsvc-dot{width:6px;height:6px;border-radius:50%;background:var(--cop3);flex-shrink:0}
+.dccontact{
+  margin-top:22px;background:rgba(30,127,196,0.07);
+  border:1px solid var(--bcw);border-radius:12px;padding:18px 20px;
+}
+.dcc-title{font-size:11px;color:var(--mt);letter-spacing:0.12em;text-transform:uppercase;margin-bottom:12px;font-weight:600}
+.dcc-rows{display:flex;flex-direction:column;gap:9px}
+.dcc-row{display:flex;align-items:center;gap:10px;font-size:13px}
+.dcc-ico{font-size:15px;width:22px;text-align:center;flex-shrink:0}
+.dcc-row a{color:var(--wat2);transition:color 0.2s}
+.dcc-row a:hover{color:var(--ice)}
+
+/* ── PROCESS ── */
+#proc{padding:120px 0;background:rgba(255,255,255,0.012);border-top:1px solid var(--bc);border-bottom:1px solid var(--bc)}
+.proci{max-width:1300px;margin:0 auto;padding:0 60px}
+.proch{text-align:center;margin-bottom:72px}
+.procg{display:grid;grid-template-columns:repeat(4,1fr);gap:2px;background:var(--bc);border-radius:20px;overflow:hidden}
+.pstep{
+  background:rgba(9,18,32,0.9);padding:44px 32px;
+  position:relative;transition:background 0.4s;overflow:hidden;
+}
+.pstep::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--cop),var(--cop3));transform:scaleX(0);transform-origin:left;transition:transform 0.5s var(--e)}
+.pstep:hover{background:rgba(14,28,50,0.95)}
+.pstep:hover::after{transform:scaleX(1)}
+.psnum{font-family:'Bebas Neue',sans-serif;font-size:96px;letter-spacing:0;color:rgba(184,116,42,0.08);line-height:1;margin-bottom:16px;transition:color 0.4s}
+.pstep:hover .psnum{color:rgba(184,116,42,0.22)}
+.psico{font-size:30px;margin-bottom:16px}
+.pst{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:0.05em;margin-bottom:12px}
+.psd{font-size:14px;color:var(--mt);line-height:1.7}
+
+/* ── REVIEWS ── */
+#rev{padding:120px 0}
+.revi{max-width:1300px;margin:0 auto;padding:0 60px}
+.revh{text-align:center;margin-bottom:72px}
+.revg{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.rc{
+  background:rgba(13,26,46,0.7);border:1px solid var(--bc);
+  border-radius:20px;padding:36px;
+  transition:all 0.45s var(--e);position:relative;overflow:hidden;
+}
+.rc::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(145deg,rgba(184,116,42,0.05),transparent);
+  opacity:0;transition:opacity 0.4s;border-radius:20px;
+}
+.rc:hover::before{opacity:1}
+.rc:hover{border-color:var(--bco);transform:translateY(-6px);box-shadow:0 24px 60px rgba(0,0,0,0.35)}
+.rcstars{color:#f59e0b;font-size:15px;letter-spacing:2px;margin-bottom:18px}
+.rcq{
+  font-family:'Playfair Display',serif;font-style:italic;
+  font-size:15px;line-height:1.78;color:var(--tx2);margin-bottom:24px;
+  position:relative;z-index:1;
+}
+.rca{display:flex;align-items:center;gap:12px;padding-top:20px;border-top:1px solid var(--bc);position:relative;z-index:1}
+.rcav{
+  width:44px;height:44px;border-radius:50%;
+  background:linear-gradient(135deg,var(--s1),var(--s2));
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Bebas Neue',sans-serif;font-size:18px;color:var(--tx2);
+  border:1px solid var(--bc);flex-shrink:0;
+}
+.rcan{font-size:14px;font-weight:600;margin-bottom:2px}
+.rcar{font-size:12px;color:var(--mt)}
+.rcsr{font-size:10px;color:var(--mt2);letter-spacing:0.06em;margin-top:2px;text-transform:uppercase}
+
+/* ── AREAS ── */
+#areas{padding:120px 0}
+.areasi{max-width:1300px;margin:0 auto;padding:0 60px}
+.areasg{display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:start}
+.amap{background:rgba(13,26,46,0.7);border:1px solid var(--bcw);border-radius:20px;padding:36px}
+.amtitle{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:0.06em;color:var(--wat2);margin-bottom:24px}
+.alist{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.atag{
+  display:flex;align-items:center;gap:8px;font-size:13px;color:var(--tx2);
+  padding:10px 14px;background:rgba(30,127,196,0.05);border:1px solid rgba(30,127,196,0.12);border-radius:8px;
+  transition:all 0.3s;
+}
+.atag:hover{background:rgba(30,127,196,0.1);border-color:var(--bcw);transform:translateX(3px)}
+.adot{width:6px;height:6px;border-radius:50%;background:var(--wat2);flex-shrink:0}
+.ainfo .sh2{font-size:clamp(34px,4vw,52px);margin-bottom:20px}
+.ainfo .ssub{margin-bottom:28px}
+.abox{border-radius:14px;padding:20px 24px;margin-bottom:16px}
+.abox.cop{background:rgba(184,116,42,0.05);border:1px solid var(--bco)}
+.abox.wat{background:rgba(30,127,196,0.05);border:1px solid var(--bcw)}
+.abt{font-size:11px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;margin-bottom:12px}
+.abt.cop{color:var(--cop3)}.abt.wat{color:var(--wat2)}
+.abrow{display:flex;justify-content:space-between;font-size:14px;padding:6px 0;border-bottom:1px solid var(--bc)}
+.abrow:last-child{border-bottom:none}
+.abk{color:var(--mt)}.abv{color:var(--tx);font-weight:600}
+.abv.ok{color:#22c55e}
+.abv.em{color:var(--cop3)}
+
+/* ── FAQ ── */
+#faq{padding:120px 0}
+.faqi{max-width:840px;margin:0 auto;padding:0 60px}
+.faqh{text-align:center;margin-bottom:64px}
+.faqlist{display:flex;flex-direction:column}
+.faqitem{border-bottom:1px solid var(--bc)}
+.faqq{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:22px 0;cursor:pointer;gap:20px;
+  font-size:15px;font-weight:500;color:var(--tx);
+  transition:color 0.25s;user-select:none;
+}
+.faqq:hover{color:var(--cop3)}
+.faqico{
+  width:28px;height:28px;border-radius:50%;
+  border:1px solid rgba(255,255,255,0.13);
+  display:flex;align-items:center;justify-content:center;
+  font-size:18px;color:var(--mt);flex-shrink:0;transition:all 0.35s;
+}
+.faqitem.open .faqico{transform:rotate(45deg);border-color:var(--cop3);color:var(--cop3)}
+.faqa{
+  max-height:0;overflow:hidden;
+  transition:max-height 0.5s var(--e),padding 0.4s;
+  font-size:15px;color:var(--mt);line-height:1.78;font-weight:300;padding:0;
+}
+.faqitem.open .faqa{max-height:260px;padding-bottom:22px}
+
+/* ── CONTACT ── */
+#contact{padding:120px 0;position:relative}
+.contacti{max-width:1300px;margin:0 auto;padding:0 60px}
+.cg{display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:start}
+.cl-sub{margin-bottom:40px}
+.ccc{display:flex;flex-direction:column;gap:13px}
+.ccard{
+  display:flex;align-items:flex-start;gap:15px;
+  background:rgba(13,26,46,0.7);border:1px solid var(--bc);
+  border-radius:14px;padding:18px 20px;
+  transition:all 0.3s;text-decoration:none;
+}
+.ccard:hover{border-color:var(--bco);transform:translateY(-2px);background:rgba(20,40,64,0.8)}
+.ccico{width:42px;height:42px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.ccico.cop{background:rgba(184,116,42,0.1);border:1px solid rgba(184,116,42,0.18)}
+.ccico.wat{background:rgba(30,127,196,0.1);border:1px solid rgba(30,127,196,0.18)}
+.cct{font-size:12px;font-weight:600;color:var(--mt);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:3px}
+.ccv{font-size:14px;color:var(--wat2);font-weight:400}
+.ccs{font-size:12px;color:var(--mt);margin-top:2px}
+.cemerg{
+  margin-top:24px;padding:18px 22px;
+  background:rgba(184,116,42,0.05);border:1px solid var(--bco);border-radius:14px;
+}
+.cemerg-t{font-size:13px;font-weight:600;color:var(--cop3);margin-bottom:6px}
+.cemerg-b{font-size:14px;color:var(--mt);line-height:1.65}
+.cemerg-b a{color:var(--cop4);font-weight:600}
+/* form */
+.cform{
+  background:rgba(13,26,46,0.8);border:1px solid var(--bco);
+  border-radius:24px;padding:44px;
+  backdrop-filter:blur(12px);
+  box-shadow:0 32px 80px rgba(0,0,0,0.4),inset 0 1px 0 rgba(255,255,255,0.04);
+}
+.cft{font-family:'Bebas Neue',sans-serif;font-size:32px;letter-spacing:0.04em;margin-bottom:6px}
+.cfs{font-size:14px;color:var(--mt);margin-bottom:30px;font-weight:300}
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.fg{margin-bottom:16px}
+.fg label{display:block;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:var(--mt);font-weight:600;margin-bottom:8px}
+.fg input,.fg select,.fg textarea{
+  width:100%;background:rgba(255,255,255,0.04);
+  border:1px solid rgba(255,255,255,0.1);
+  border-radius:10px;padding:14px 16px;
+  font-family:'Inter',sans-serif;font-size:14px;color:var(--tx);outline:none;
+  transition:all 0.3s;-webkit-appearance:none;
+}
+.fg input::placeholder,.fg textarea::placeholder{color:var(--mt2)}
+.fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--bco);background:rgba(184,116,42,0.03);box-shadow:0 0 0 3px rgba(184,116,42,0.07)}
+.fg textarea{resize:vertical;min-height:110px}
+.fg select option{background:var(--bg2)}
+.fsub{
+  width:100%;background:linear-gradient(135deg,var(--cop),var(--cop2));
+  color:#fff;border:none;padding:16px;border-radius:10px;
+  font-family:'Inter',sans-serif;font-size:15px;font-weight:600;
+  cursor:pointer;transition:all 0.35s;letter-spacing:0.03em;
+  box-shadow:0 8px 32px rgba(184,116,42,0.3);margin-top:4px;
+}
+.fsub:hover{transform:translateY(-2px);box-shadow:0 16px 48px rgba(184,116,42,0.45)}
+.fnote{font-size:12px;color:var(--mt2);text-align:center;margin-top:12px}
+.fsuccess{display:none;text-align:center;padding:32px}
+.fsuccess.show{display:block}
+.fsico{font-size:52px;margin-bottom:16px}
+.fst{font-family:'Bebas Neue',sans-serif;font-size:30px;letter-spacing:0.04em;color:var(--cop3);margin-bottom:8px}
+.fss{font-size:15px;color:var(--mt);line-height:1.7;font-weight:300}
+.fss a{color:var(--cop3)}
+
+/* ── FINAL CTA ── */
+#ctaf{
+  padding:160px 60px;text-align:center;
+  position:relative;overflow:hidden;
+}
+.ctafbg{position:absolute;inset:0;pointer-events:none}
+.ctao1{position:absolute;width:700px;height:700px;border-radius:50%;background:radial-gradient(circle,rgba(184,116,42,0.1) 0%,transparent 70%);top:50%;left:50%;transform:translate(-50%,-50%);animation:ctao 7s ease-in-out infinite alternate}
+.ctao2{position:absolute;width:500px;height:500px;border-radius:50%;background:radial-gradient(circle,rgba(30,127,196,0.08) 0%,transparent 70%);top:50%;left:35%;transform:translate(-50%,-50%);animation:ctao 11s ease-in-out infinite alternate-reverse}
+@keyframes ctao{from{transform:translate(-50%,-50%) scale(0.85)}to{transform:translate(-50%,-50%) scale(1.15)}}
+.ctafl{width:1px;height:70px;background:linear-gradient(var(--bco),transparent);margin:0 auto 52px}
+.ctah{font-family:'Bebas Neue',sans-serif;font-size:clamp(48px,7vw,100px);letter-spacing:0.02em;line-height:0.9;margin-bottom:24px;position:relative;z-index:1}
+.ctah em{color:var(--cop3);font-style:normal}
+.ctasub{font-size:18px;color:var(--mt);max-width:520px;margin:0 auto 48px;line-height:1.75;font-weight:300;position:relative;z-index:1}
+.ctabtns{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;position:relative;z-index:1}
+.ctanote{font-size:13px;color:var(--mt2);margin-top:18px;position:relative;z-index:1}
+
+/* ── FOOTER ── */
+footer{background:rgba(255,255,255,0.015);border-top:1px solid var(--bc);padding:64px 60px 40px}
+.footi{max-width:1300px;margin:0 auto}
+.footg{display:grid;grid-template-columns:1.8fr 1fr 1fr 1fr;gap:60px;margin-bottom:52px}
+.fb-mark{width:46px;height:46px;border-radius:50%;background:linear-gradient(135deg,var(--cop),var(--cop3));display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--bg);margin-bottom:14px}
+.fb-name{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:0.06em;margin-bottom:6px}
+.fb-tag{font-size:13px;color:var(--mt);font-weight:300;line-height:1.65;max-width:220px;margin-bottom:20px}
+.fsocs{display:flex;gap:10px}
+.fsoc{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,0.04);border:1px solid var(--bc);display:flex;align-items:center;justify-content:center;font-size:13px;transition:all 0.3s;text-decoration:none;font-weight:700;color:var(--mt)}
+.fsoc:hover{background:rgba(184,116,42,0.1);border-color:var(--bco);color:var(--cop3);transform:translateY(-2px)}
+.fc h4{font-size:11px;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;color:var(--mt);margin-bottom:16px}
+.fc ul{list-style:none;display:flex;flex-direction:column;gap:10px}
+.fc ul a{font-size:14px;color:var(--mt2);transition:color 0.2s}
+.fc ul a:hover{color:var(--cop3)}
+.footb{
+  padding-top:28px;border-top:1px solid var(--bc);
+  display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;
+}
+.footc{font-size:12px;color:var(--mt2)}
+.footl{font-size:12px;color:var(--mt2);display:flex;align-items:center;gap:8px}
+.footl span{color:var(--cop3)}
+
+/* ── RESPONSIVE ── */
+@media(max-width:1100px){
+  .hero-float{display:none}
+  .about-grid,.cg,.areasg{grid-template-columns:1fr}
+  .csi.l,.csi.r{grid-template-columns:1fr}
+  .svcg,.revg{grid-template-columns:1fr 1fr}
+  .procg{grid-template-columns:1fr 1fr}
+  .stats-grid{grid-template-columns:1fr 1fr}
+  .footg{grid-template-columns:1fr 1fr}
+}
+@media(max-width:768px){
+  #nav{padding:0 20px}
+  nav ul{display:none}
+  .ebar{padding:10px 20px;font-size:11px}
+  #hero{padding:120px 24px 80px}
+  .hero-inner,.svci,.revi,.areasi,.proci,.faqi,.contacti{padding:0 24px}
+  .svcg,.revg,.procg{grid-template-columns:1fr}
+  .stats-grid{grid-template-columns:1fr 1fr}
+  .csi{padding:80px 24px}
+  .cs{padding:80px 24px}
+  footer{padding:48px 24px 32px}
+  .footg{grid-template-columns:1fr 1fr;gap:40px}
+  #ctaf{padding:100px 24px}
+  .frow{grid-template-columns:1fr}
+  .alist{grid-template-columns:1fr}
+  .acreds{grid-template-columns:1fr 1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- LOADER -->
+<div id="loader">
+  <div class="ld-logo">NORTH POINT PLUMBING</div>
+  <div class="ld-sub">Albany, Oregon · Est. by Derrick Hostetler</div>
+  <div class="ld-bar"><div class="ld-fill"></div></div>
+</div>
+
+<canvas id="cv"></canvas>
+
+<div class="page">
+
+<!-- EMERGENCY BAR -->
+<div class="ebar">
+  <div class="ebd"></div>
+  24/7 Emergency Plumbing — Albany, OR &nbsp;·&nbsp;
+  <a href="tel:5419747935">Call Now: (541) 974-7935</a>
+  &nbsp;·&nbsp; Fast Response Guaranteed
+</div>
+
+<!-- NAV -->
+<nav id="nav">
+  <div class="nlogo">
+    <div class="nmark">N</div>
+    <div class="nname">
+      <span class="nname-main">NORTH POINT PLUMBING</span>
+      <span class="nname-sub">LLC · Albany, Oregon</span>
+    </div>
+  </div>
+  <ul>
+    <li><a href="#svc">Services</a></li>
+    <li><a href="#about">About</a></li>
+    <li><a href="#rev">Reviews</a></li>
+    <li><a href="#areas">Areas</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+  <div class="nr">
+    <a href="tel:5419747935" class="nph">☎ (541) 974-7935</a>
+    <button class="ncta" onclick="document.getElementById('contact').scrollIntoView({behavior:'smooth'})">Free Quote</button>
+  </div>
+</nav>
+
+<!-- ═══════ HERO ═══════ -->
+<section id="hero">
+  <div class="hmesh">
+    <div class="hmesh-orb ho1"></div>
+    <div class="hmesh-orb ho2"></div>
+    <div class="hmesh-orb ho3"></div>
+    <div class="hgrid"></div>
+  </div>
+  <div class="hero-inner">
+    <div class="hero-eyebrow"><span class="heb-dot"></span>Albany's Most Trusted Plumber · 25+ Years</div>
+    <h1 class="hero-h1">NORTH POINT<br><span class="l2">PLUMBING LLC</span></h1>
+    <p class="hero-serif">Expert craftsmanship. Honest pricing. Guaranteed work.</p>
+    <p class="hero-body"><strong>Derrick Hostetler</strong> brings over <strong>25 years of mastery</strong> to every job in Albany and the Willamette Valley. From emergency repairs to full new construction — done right, the first time, every time.</p>
+    <div class="hbtns">
+      <a href="tel:5419747935" class="bp"><span>📞 Call (541) 974-7935</span></a>
+      <a href="sms:15419747935" class="bs">💬 Text Us Anytime</a>
+    </div>
+    <div class="htrust">
+      <div class="hti">⭐ 5-Star Rated</div>
+      <div class="htdiv"></div>
+      <div class="hti">🛡️ Licensed &amp; Insured</div>
+      <div class="htdiv"></div>
+      <div class="hti">⚡ Same-Day Available</div>
+      <div class="htdiv"></div>
+      <div class="hti">🏆 25+ Yrs Experience</div>
+    </div>
+  </div>
+  <!-- floating card -->
+  <div class="hero-float">
+    <div class="hfcard">
+      <div class="hfcard-top">
+        <div class="hfav">D</div>
+        <div>
+          <div class="hfname">Derrick Hostetler</div>
+          <div class="hftitle">Owner &amp; Master Plumber</div>
+          <div class="hfstars">★★★★★</div>
+        </div>
+      </div>
+      <div class="hfsvc">
+        <div class="hfs"><span class="hfs-ico">🏠</span><span class="hfs-name">Home Remodels</span><span class="hfs-tag">Popular</span></div>
+        <div class="hfs"><span class="hfs-ico">🏗️</span><span class="hfs-name">New Construction</span><span class="hfs-tag">Expert</span></div>
+        <div class="hfs"><span class="hfs-ico">🔧</span><span class="hfs-name">Repairs &amp; Leaks</span><span class="hfs-tag">Same Day</span></div>
+        <div class="hfs"><span class="hfs-ico">🚨</span><span class="hfs-name">Emergency 24/7</span><span class="hfs-tag">Always On</span></div>
+      </div>
+      <div class="hffoot">
+        <span class="hffoot-ico">📍</span>
+        <div class="hffoot-txt">
+          <strong>Albany, OR &amp; All of Linn County</strong>
+          Corvallis · Lebanon · Sweet Home · Tangent
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="shint"><span class="shlbl">Scroll</span><div class="shln"></div></div>
+</section>
+
+<!-- MARQUEE -->
+<div class="tbar">
+  <div class="ttrack">
+    <span class="titem">HOME REMODELS</span><span class="tdot">◆</span>
+    <span class="titem">NEW CONSTRUCTION</span><span class="tdot">◆</span>
+    <span class="titem">EMERGENCY REPAIRS</span><span class="tdot">◆</span>
+    <span class="titem">FIXTURE INSTALLATION</span><span class="tdot">◆</span>
+    <span class="titem">WATER HEATERS</span><span class="tdot">◆</span>
+    <span class="titem">LEAK DETECTION</span><span class="tdot">◆</span>
+    <span class="titem">DRAIN CLEANING</span><span class="tdot">◆</span>
+    <span class="titem">ALBANY, OREGON</span><span class="tdot">◆</span>
+    <span class="titem">25+ YEARS EXPERIENCE</span><span class="tdot">◆</span>
+    <span class="titem">LICENSED &amp; INSURED</span><span class="tdot">◆</span>
+    <!-- duplicate for seamless loop -->
+    <span class="titem">HOME REMODELS</span><span class="tdot">◆</span>
+    <span class="titem">NEW CONSTRUCTION</span><span class="tdot">◆</span>
+    <span class="titem">EMERGENCY REPAIRS</span><span class="tdot">◆</span>
+    <span class="titem">FIXTURE INSTALLATION</span><span class="tdot">◆</span>
+    <span class="titem">WATER HEATERS</span><span class="tdot">◆</span>
+    <span class="titem">LEAK DETECTION</span><span class="tdot">◆</span>
+    <span class="titem">DRAIN CLEANING</span><span class="tdot">◆</span>
+    <span class="titem">ALBANY, OREGON</span><span class="tdot">◆</span>
+    <span class="titem">25+ YEARS EXPERIENCE</span><span class="tdot">◆</span>
+    <span class="titem">LICENSED &amp; INSURED</span><span class="tdot">◆</span>
+  </div>
+</div>
+
+<!-- STATS -->
+<div id="stats">
+  <div class="stats-grid">
+    <div class="sitem rv"><div class="snum" data-target="25" data-suffix="+">0+</div><div class="slbl">Years of Expertise</div></div>
+    <div class="sitem rv d1"><div class="snum" data-target="500" data-suffix="+">0+</div><div class="slbl">Happy Customers</div></div>
+    <div class="sitem rv d2"><div class="snum" data-target="100" data-suffix="%">0%</div><div class="slbl">Licensed &amp; Insured</div></div>
+    <div class="sitem rv d3"><div class="snum" data-target="24" data-suffix="/7">0/7</div><div class="slbl">Emergency Line</div></div>
+  </div>
+</div>
+
+<!-- ═══════ 3D SCENE 1 — WATER TORUS ═══════ -->
+<div class="cs" id="cs1">
+  <div class="csi l">
+    <div class="cst rvl">
+      <span class="stag">The North Point Way</span>
+      <h2 class="sh2">We fix the<br>cause. Not just<br><em>the symptom.</em></h2>
+      <p class="ssub" style="margin-bottom:28px">Most plumbers patch and leave. Derrick diagnoses the root issue, explains it to you in plain English, then fixes it right — so you're never calling twice for the same problem.</p>
+      <div style="display:flex;flex-direction:column;gap:16px">
+        <div style="display:flex;gap:14px;align-items:flex-start">
+          <div style="width:34px;height:34px;border-radius:9px;background:rgba(184,116,42,0.1);border:1px solid rgba(184,116,42,0.2);display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;color:var(--cop3)">✓</div>
+          <div><div style="font-size:14px;font-weight:600;margin-bottom:4px;color:var(--tx)">Upfront, flat-rate pricing</div><div style="font-size:13px;color:var(--mt);line-height:1.6">You know the cost before work starts. No surprises.</div></div>
+        </div>
+        <div style="display:flex;gap:14px;align-items:flex-start">
+          <div style="width:34px;height:34px;border-radius:9px;background:rgba(184,116,42,0.1);border:1px solid rgba(184,116,42,0.2);display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;color:var(--cop3)">✓</div>
+          <div><div style="font-size:14px;font-weight:600;margin-bottom:4px;color:var(--tx)">Derrick's personal guarantee</div><div style="font-size:13px;color:var(--mt);line-height:1.6">Every job backed by a real workmanship guarantee.</div></div>
+        </div>
+        <div style="display:flex;gap:14px;align-items:flex-start">
+          <div style="width:34px;height:34px;border-radius:9px;background:rgba(184,116,42,0.1);border:1px solid rgba(184,116,42,0.2);display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;color:var(--cop3)">✓</div>
+          <div><div style="font-size:14px;font-weight:600;margin-bottom:4px;color:var(--tx)">Clean &amp; respectful every time</div><div style="font-size:13px;color:var(--mt);line-height:1.6">Tarps, shoe covers, full site cleanup. Your home is respected.</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="rvr" style="display:flex;align-items:center;justify-content:center">
+      <!-- The 3D scene renders behind this content -->
+      <div style="background:rgba(9,18,32,0.6);border:1px solid var(--bcw);border-radius:22px;padding:36px;backdrop-filter:blur(10px);width:100%;max-width:420px">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:0.12em;color:var(--mt);margin-bottom:22px">LIVE PLUMBING DIAGNOSTICS</div>
+        <canvas id="pipeCanvas" width="340" height="200" style="width:100%;border-radius:12px;background:rgba(255,255,255,0.02);border:1px solid var(--bc);display:block;margin-bottom:18px"></canvas>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px">
+          <div style="background:rgba(255,255,255,0.03);border:1px solid var(--bc);border-radius:10px;padding:13px;text-align:center">
+            <div style="font-family:'Bebas Neue',sans-serif;font-size:12px;color:var(--mt);letter-spacing:0.08em;margin-bottom:5px">PRESSURE</div>
+            <div id="psiV" style="font-family:'Bebas Neue',sans-serif;font-size:28px;color:var(--tx)">82</div>
+            <div style="font-size:10px;color:var(--mt)">PSI</div>
+          </div>
+          <div style="background:rgba(255,255,255,0.03);border:1px solid var(--bc);border-radius:10px;padding:13px;text-align:center">
+            <div style="font-family:'Bebas Neue',sans-serif;font-size:12px;color:var(--mt);letter-spacing:0.08em;margin-bottom:5px">FLOW</div>
+            <div id="gpmV" style="font-family:'Bebas Neue',sans-serif;font-size:28px;color:var(--wat2)">3.2</div>
+            <div style="font-size:10px;color:var(--mt)">GPM</div>
+          </div>
+          <div style="background:rgba(255,255,255,0.03);border:1px solid var(--bc);border-radius:10px;padding:13px;text-align:center">
+            <div style="font-family:'Bebas Neue',sans-serif;font-size:12px;color:var(--mt);letter-spacing:0.08em;margin-bottom:5px">STATUS</div>
+            <div style="font-family:'Bebas Neue',sans-serif;font-size:28px;color:#22c55e">OK</div>
+            <div style="font-size:10px;color:#22c55e">No Leaks</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ SERVICES ═══════ -->
+<section id="svc">
+  <div class="svci">
+    <div class="svch rv">
+      <span class="stag">Full-Service Plumbing</span>
+      <h2 class="sh2" style="text-align:center">Everything your<br>home's plumbing needs.</h2>
+      <p class="ssub" style="text-align:center;max-width:560px;margin:0 auto">North Point handles it all — from dripping faucets to complete new-build systems. Derrick brings mastery-level skill to every single job.</p>
+    </div>
+    <div class="svcg">
+      <div class="sc rv d1"><div class="sc-ico">🏠</div><h3>Home Remodels</h3><p>Kitchen or bathroom refresh? We handle all plumbing work with precision — rerouting lines, installing fixtures, and keeping your project on schedule.</p><ul><li>Kitchen plumbing relocations</li><li>Full bathroom gut &amp; rebuild</li><li>Shower, tub &amp; sink installation</li><li>In-wall &amp; under-slab rough-in</li><li>Permit-ready for all inspections</li></ul><span class="sc-link">Get a quote →</span></div>
+      <div class="sc rv d2"><div class="sc-ico">🏗️</div><h3>New Construction</h3><p>We lay the plumbing foundation of new builds right. Coordinating with GCs throughout every phase — from rough-in to final trim.</p><ul><li>Whole-home rough-in plumbing</li><li>Sewer &amp; water service lines</li><li>Water heater sizing &amp; install</li><li>Commercial &amp; residential builds</li><li>Inspection-ready at every phase</li></ul><span class="sc-link">Get a quote →</span></div>
+      <div class="sc rv d3"><div class="sc-ico">🔧</div><h3>Repairs &amp; Service</h3><p>Leaky faucet? Burst pipe? No hot water? Same-day response for most calls — and Derrick fixes it right the first visit.</p><ul><li>Leak detection &amp; pipe repair</li><li>Faucet &amp; fixture replacement</li><li>Water heater repair &amp; swap</li><li>Drain cleaning &amp; unclogging</li><li>24/7 emergency response</li></ul><span class="sc-link">Call now →</span></div>
+      <div class="sc rv d1"><div class="sc-ico">🚰</div><h3>Fixture Installation</h3><p>New faucets, custom shower systems, pot fillers, water softeners — installed with the precision that keeps them running for decades.</p><ul><li>Kitchen &amp; bath faucets</li><li>Toilets, bidets &amp; smart fixtures</li><li>Custom shower systems</li><li>Water softeners &amp; filtration</li><li>Gas line installation</li></ul><span class="sc-link">Get a quote →</span></div>
+      <div class="sc rv d2"><div class="sc-ico">🌡️</div><h3>Water Heaters</h3><p>Cold showers end today. Same-day tank and tankless water heater installation, service, and replacement throughout Albany.</p><ul><li>Tank &amp; tankless systems</li><li>Gas, electric &amp; hybrid units</li><li>Energy-efficient upgrades</li><li>Same-day emergency swap</li><li>All major brands serviced</li></ul><span class="sc-link">Get a quote →</span></div>
+      <div class="sc rv d3"><div class="sc-ico">🚨</div><h3>Emergency Plumbing</h3><p>Plumbing disasters don't wait. North Point is live 24/7 for burst pipes, sewer backups, flooding — anything that can't wait until morning.</p><ul><li>24/7 emergency response</li><li>Burst &amp; frozen pipe repair</li><li>Sewer backup clearing</li><li>Flood shutoff &amp; damage control</li><li>Fast arrival across Linn County</li></ul><span class="sc-link">Call 24/7 →</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════ 3D SCENE 2 — RINGS ═══════ -->
+<div class="cs" id="cs2">
+  <div class="csi r">
+    <div class="rvl" style="display:flex;align-items:center;justify-content:center">
+      <div style="background:rgba(9,18,32,0.75);border:1px solid var(--bco);border-radius:22px;padding:36px;backdrop-filter:blur(12px);max-width:400px;width:100%">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:0.08em;color:var(--cop3);margin-bottom:22px">WHAT ALBANY SAYS</div>
+        <div style="display:flex;flex-direction:column;gap:14px">
+          <div style="padding:18px;background:rgba(255,255,255,0.03);border:1px solid var(--bc);border-radius:12px">
+            <div style="font-size:16px;color:#f59e0b;letter-spacing:2px;margin-bottom:10px">★★★★★</div>
+            <div style="font-family:'Playfair Display',serif;font-style:italic;font-size:14px;color:var(--tx2);line-height:1.65;margin-bottom:10px">"North Point Plumbing exceeded my expectations! Their expertise and professionalism were evident from start to finish."</div>
+            <div style="font-size:12px;color:var(--cop3);font-weight:600">— Kim Weibe, Albany OR</div>
+          </div>
+          <div style="padding:18px;background:rgba(255,255,255,0.03);border:1px solid var(--bc);border-radius:12px">
+            <div style="font-size:16px;color:#f59e0b;letter-spacing:2px;margin-bottom:10px">★★★★★</div>
+            <div style="font-family:'Playfair Display',serif;font-style:italic;font-size:14px;color:var(--tx2);line-height:1.65;margin-bottom:10px">"Their attention to detail and quality work is unmatched. I'm a customer for life!"</div>
+            <div style="font-size:12px;color:var(--cop3);font-weight:600">— Will Sheppy, Albany OR</div>
+          </div>
+          <div style="padding:13px 16px;background:rgba(30,127,196,0.07);border:1px solid var(--bcw);border-radius:10px;display:flex;align-items:center;gap:12px">
+            <span style="font-size:22px">🏅</span>
+            <div><div style="font-size:13px;font-weight:600">Top-Rated on Google &amp; Facebook</div><div style="font-size:12px;color:var(--mt);margin-top:2px">Consistently 5-star across the Valley</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="cst rvr">
+      <span class="stag">25+ Years in Albany</span>
+      <h2 class="sh2">Built on<br>integrity.<br><em>Proven by results.</em></h2>
+      <p class="ssub">Derrick is known throughout the Willamette Valley for his honest work ethic and genuine respect for your home. He doesn't just send a crew — he shows up himself, takes ownership of every job, and doesn't leave until it's right.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ ABOUT DERRICK ═══════ -->
+<section id="about">
+  <div class="about-grid">
+    <div class="rvl">
+      <div style="display:inline-flex;align-items:center;gap:10px;background:rgba(30,127,196,0.07);border:1px solid var(--bcw);border-radius:100px;padding:7px 18px;font-size:11px;color:var(--wat2);letter-spacing:0.14em;text-transform:uppercase;font-weight:600;margin-bottom:26px">🏆 Owner &amp; Master Plumber · Albany, OR</div>
+      <h2 class="sh2">Meet Derrick<br><em>Hostetler</em></h2>
+      <div class="abio">
+        <p>Derrick Hostetler, owner of <strong>North Point Plumbing LLC</strong>, brings over <strong>25 years of hands-on mastery</strong> and an unwavering commitment to excellence to every job in Albany and the Willamette Valley.</p>
+        <p>Known for his <strong>honest work ethic and dependable service</strong>, Derrick has built a reputation as a plumber who solves problems with integrity and respect for his clients' homes and businesses.</p>
+        <p>Whether it's a simple faucet swap or a full new-construction system, Derrick brings the same level of care. He communicates every step, works with surgical precision, and refuses to cut corners — ever.</p>
+      </div>
+      <div class="aquote">
+        <p class="aqt">"I started North Point because homeowners deserve a plumber they can actually trust — someone who shows up on time, charges a fair price, and does it right the first time. That's the standard I hold myself to every single day."</p>
+        <div class="aqs">— Derrick Hostetler, Owner · North Point Plumbing LLC</div>
+      </div>
+      <div class="acreds">
+        <div class="acred"><div class="acred-ico">🎓</div><div class="acred-v">25+ YRS</div><div class="acred-l">Field Experience</div></div>
+        <div class="acred"><div class="acred-ico">🛡️</div><div class="acred-v">LICENSED</div><div class="acred-l">State of Oregon</div></div>
+        <div class="acred"><div class="acred-ico">🔒</div><div class="acred-v">INSURED</div><div class="acred-l">Fully Protected</div></div>
+        <div class="acred"><div class="acred-ico">📍</div><div class="acred-v">ALBANY</div><div class="acred-l">Oregon Based</div></div>
+      </div>
+    </div>
+    <div class="rvr">
+      <div class="dcard">
+        <div class="dcTop">
+          <div class="dcAv">D</div>
+          <div>
+            <div class="dcn">Derrick Hostetler</div>
+            <div class="dct">Owner · Master Plumber</div>
+            <div class="dcl">📍 Albany, Oregon</div>
+            <div class="dcstars">★★★★★</div>
+          </div>
+        </div>
+        <div class="dcstats">
+          <div class="dcsi"><div class="dcsn">25+</div><div class="dcsl">Yrs Exp.</div></div>
+          <div class="dcsi"><div class="dcsn">500+</div><div class="dcsl">Jobs Done</div></div>
+          <div class="dcsi"><div class="dcsn">5★</div><div class="dcsl">Avg Rating</div></div>
+        </div>
+        <div class="dcsvcs">
+          <div class="dcsvc"><div class="dcsvc-dot"></div>Home Remodels &amp; Renovations</div>
+          <div class="dcsvc"><div class="dcsvc-dot"></div>New Construction Plumbing</div>
+          <div class="dcsvc"><div class="dcsvc-dot"></div>Repairs, Leaks &amp; Emergencies</div>
+          <div class="dcsvc"><div class="dcsvc-dot"></div>Fixture &amp; Appliance Installation</div>
+          <div class="dcsvc"><div class="dcsvc-dot"></div>Water Heater Service &amp; Replacement</div>
+        </div>
+        <div class="dccontact">
+          <div class="dcc-title">Direct Contact</div>
+          <div class="dcc-rows">
+            <div class="dcc-row"><span class="dcc-ico">📞</span><div><a href="tel:5419747935">(541) 974-7935</a></div></div>
+            <div class="dcc-row"><span class="dcc-ico">💬</span><div><a href="sms:15419747935">Text: (541) 974-7935</a></div></div>
+            <div class="dcc-row"><span class="dcc-ico">✉️</span><div><a href="mailto:northpointplumbingllc@gmail.com">northpointplumbingllc@gmail.com</a></div></div>
+            <div class="dcc-row"><span class="dcc-ico">🌐</span><div><a href="https://northpointplumbingllc.com">northpointplumbingllc.com</a></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════ PROCESS ═══════ -->
+<section id="proc">
+  <div class="proci">
+    <div class="proch rv">
+      <span class="stag">How It Works</span>
+      <h2 class="sh2" style="text-align:center">Simple process.<br><em>Expert results.</em></h2>
+      <p class="ssub" style="text-align:center;max-width:500px;margin:0 auto">Getting great plumbing work done should be easy. Here's how North Point makes it effortless.</p>
+    </div>
+    <div class="procg">
+      <div class="pstep rv d1"><div class="psnum">01</div><div class="psico">📞</div><div class="pst">Call or Text</div><p class="psd">Reach Derrick directly at (541) 974-7935. Describe your issue — he'll give you an honest assessment on the spot, no runaround.</p></div>
+      <div class="pstep rv d2"><div class="psnum">02</div><div class="psico">🔍</div><div class="pst">Free Estimate</div><p class="psd">We come to you, diagnose the situation, and give you a clear upfront quote. No hidden fees, no pressure. Just honest pricing.</p></div>
+      <div class="pstep rv d3"><div class="psnum">03</div><div class="psico">⚙️</div><div class="pst">Expert Work</div><p class="psd">Derrick and his team get to work with 25+ years of precision. We protect your home, work efficiently, and keep you in the loop.</p></div>
+      <div class="pstep rv d4"><div class="psnum">04</div><div class="psico">✅</div><div class="pst">Guaranteed Done</div><p class="psd">We don't leave until you're satisfied. Every job comes with Derrick's personal workmanship guarantee — in writing.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════ 3D SCENE 3 — HELIX ═══════ -->
+<div class="cs" id="cs3">
+  <div class="csi l">
+    <div class="cst rvl">
+      <span class="stag">Precision Craftsmanship</span>
+      <h2 class="sh2">Every joint.<br>Every fitting.<br><em>Perfect.</em></h2>
+      <p class="ssub" style="margin-bottom:32px">Plumbing done right is invisible. It works quietly behind your walls for decades, protecting your home every single day. That's the standard Derrick brings to every job — the craftsmanship you can't see, but that you'll never have to worry about.</p>
+      <a href="tel:5419747935" class="bp" style="display:inline-flex"><span>📞 Get Your Free Estimate</span></a>
+    </div>
+    <div class="rvr" style="display:flex;align-items:center;justify-content:center">
+      <div style="text-align:center;position:relative">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:clamp(100px,14vw,160px);line-height:1;background:linear-gradient(135deg,var(--cop),var(--cop4));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">25</div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:clamp(20px,3vw,32px);letter-spacing:0.1em;color:var(--mt);margin-top:-10px">YEARS OF TRUST</div>
+        <div style="width:80px;height:2px;background:linear-gradient(90deg,transparent,var(--cop),transparent);margin:18px auto"></div>
+        <div style="font-size:14px;color:var(--mt);max-width:240px;margin:0 auto;line-height:1.7">Serving Albany &amp; the entire Willamette Valley since day one.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ REVIEWS ═══════ -->
+<section id="rev">
+  <div class="revi">
+    <div class="revh rv">
+      <span class="stag">Customer Reviews</span>
+      <h2 class="sh2" style="text-align:center">Albany homes trust<br><em>North Point.</em></h2>
+      <p class="ssub" style="text-align:center;max-width:500px;margin:0 auto">Real reviews from real Albany homeowners. Don't take our word for it.</p>
+    </div>
+    <div class="revg">
+      <div class="rc rv d1"><div class="rcstars">★★★★★</div><p class="rcq">"North Point Plumbing exceeded my expectations! Their expertise and professionalism were evident from start to finish. Derrick was on time, explained everything clearly, and the work was impeccable."</p><div class="rca"><div class="rcav">K</div><div><div class="rcan">Kim Weibe</div><div class="rcar">Albany, Oregon</div><div class="rcsr">⭐ Google Review</div></div></div></div>
+      <div class="rc rv d2"><div class="rcstars">★★★★★</div><p class="rcq">"Their attention to detail and quality work is unmatched. I'm a customer for life! Had a major slab leak — Derrick found it, fixed it fast, and left my house cleaner than before he arrived."</p><div class="rca"><div class="rcav">W</div><div><div class="rcan">Will Sheppy</div><div class="rcar">Albany, Oregon</div><div class="rcsr">⭐ Google Review</div></div></div></div>
+      <div class="rc rv d3"><div class="rcstars">★★★★★</div><p class="rcq">"Called at 7pm Friday with a burst pipe. Derrick picked up, came within the hour, and had everything fixed by 10pm. You genuinely cannot put a price on that kind of reliability."</p><div class="rca"><div class="rcav">T</div><div><div class="rcan">Tom R.</div><div class="rcar">Corvallis, Oregon</div><div class="rcsr">⭐ Facebook Review</div></div></div></div>
+      <div class="rc rv d1"><div class="rcstars">★★★★★</div><p class="rcq">"Used North Point for a full kitchen remodel — supply lines, drain relocation, pot filler install. Flawless. Worked perfectly with our contractor and passed inspection first try."</p><div class="rca"><div class="rcav">S</div><div><div class="rcan">Sarah M.</div><div class="rcar">Lebanon, Oregon</div><div class="rcsr">⭐ Google Review</div></div></div></div>
+      <div class="rc rv d2"><div class="rcstars">★★★★★</div><p class="rcq">"Derrick replaced our water heater and installed a whole-home water softener in the same day. Fair price, fast work, explained everything. We couldn't be happier."</p><div class="rca"><div class="rcav">J</div><div><div class="rcan">James &amp; Linda F.</div><div class="rcar">Albany, Oregon</div><div class="rcsr">⭐ Google Review</div></div></div></div>
+      <div class="rc rv d3"><div class="rcstars">★★★★★</div><p class="rcq">"Used North Point for new construction plumbing on our custom home. Showed up every time he said he would, stayed on schedule, and rough-in passed county inspection without a single correction."</p><div class="rca"><div class="rcav">R</div><div><div class="rcan">Ryan B.</div><div class="rcar">Tangent, Oregon</div><div class="rcsr">⭐ Facebook Review</div></div></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════ 3D SCENE 4 — GRID WAVE ═══════ -->
+<div class="cs" id="cs4" style="min-height:75vh">
+  <div style="text-align:center;position:relative;z-index:2;max-width:700px;margin:0 auto">
+    <span class="stag rv">Built for Albany</span>
+    <h2 class="sh2 rv" style="text-align:center;font-size:clamp(44px,6vw,80px)">Quality plumbing<br><em>Albany can depend on.</em></h2>
+    <p class="ssub rv" style="text-align:center;margin:0 auto;max-width:460px">25 years. 500+ happy homes. One plumber who answers his phone.</p>
+  </div>
+</div>
+
+<!-- ═══════ SERVICE AREAS ═══════ -->
+<section id="areas">
+  <div class="areasi">
+    <div style="text-align:center;margin-bottom:64px" class="rv">
+      <span class="stag">Where We Work</span>
+      <h2 class="sh2" style="text-align:center">Serving all of<br><em>Linn County &amp; beyond.</em></h2>
+    </div>
+    <div class="areasg">
+      <div class="amap rvl">
+        <div class="amtitle">📍 Service Coverage</div>
+        <div class="alist">
+          <div class="atag"><div class="adot"></div>Albany (HQ)</div>
+          <div class="atag"><div class="adot"></div>Corvallis</div>
+          <div class="atag"><div class="adot"></div>Lebanon</div>
+          <div class="atag"><div class="adot"></div>Sweet Home</div>
+          <div class="atag"><div class="adot"></div>Tangent</div>
+          <div class="atag"><div class="adot"></div>Halsey</div>
+          <div class="atag"><div class="adot"></div>Shedd</div>
+          <div class="atag"><div class="adot"></div>Brownsville</div>
+          <div class="atag"><div class="adot"></div>Jefferson</div>
+          <div class="atag"><div class="adot"></div>Millersburg</div>
+        </div>
+        <div style="margin-top:18px;padding:14px 18px;background:rgba(184,116,42,0.04);border:1px solid var(--bco);border-radius:10px;font-size:13px;color:var(--mt)">ℹ️ Not seeing your city? Call us — we travel for the right job.</div>
+      </div>
+      <div class="ainfo rvr">
+        <span class="stag">Business Info</span>
+        <h2 class="sh2">North Point<br><em>Plumbing LLC</em></h2>
+        <p class="ssub">A locally owned plumbing company serving Albany, Oregon and the Willamette Valley with pride, precision, and integrity.</p>
+        <div class="abox cop">
+          <div class="abt cop">Business Details</div>
+          <div class="abrow"><span class="abk">Company</span><span class="abv">North Point Plumbing LLC</span></div>
+          <div class="abrow"><span class="abk">Owner</span><span class="abv">Derrick Hostetler</span></div>
+          <div class="abrow"><span class="abk">Location</span><span class="abv">Albany, Oregon</span></div>
+          <div class="abrow"><span class="abk">Trade</span><span class="abv">Plumbing (Res. &amp; Commercial)</span></div>
+          <div class="abrow"><span class="abk">License</span><span class="abv ok">✓ Licensed — State of Oregon</span></div>
+        </div>
+        <div class="abox wat">
+          <div class="abt wat">Hours of Operation</div>
+          <div class="abrow"><span class="abk">Mon – Fri</span><span class="abv">7:00 AM – 6:00 PM</span></div>
+          <div class="abrow"><span class="abk">Saturday</span><span class="abv">8:00 AM – 4:00 PM</span></div>
+          <div class="abrow"><span class="abk">Sunday</span><span class="abv em">Emergency Calls Only</span></div>
+          <div class="abrow"><span class="abk">24/7</span><span class="abv em">Emergency Line Always Active</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════ FAQ ═══════ -->
+<section id="faq">
+  <div class="faqi">
+    <div class="faqh rv">
+      <span class="stag">FAQ</span>
+      <h2 class="sh2" style="text-align:center">Common questions<br><em>answered.</em></h2>
+    </div>
+    <div class="faqlist">
+      <div class="faqitem rv"><div class="faqq">Do you offer free estimates?<span class="faqico">+</span></div><div class="faqa">Yes — always. Derrick comes to your home, diagnoses the issue, and gives you a clear, upfront quote before any work begins. No pressure, no hidden fees.</div></div>
+      <div class="faqitem rv"><div class="faqq">Are you licensed and insured in Oregon?<span class="faqico">+</span></div><div class="faqa">Absolutely. North Point Plumbing LLC is fully licensed and insured in the State of Oregon. We carry all required certifications and comprehensive liability insurance to protect your property on every job.</div></div>
+      <div class="faqitem rv"><div class="faqq">How fast do you respond to emergencies?<span class="faqico">+</span></div><div class="faqa">Fast. For burst pipes, flooding, or other urgent issues, we aim to be on-site within 1–2 hours in the Albany area. Call (541) 974-7935 any time — day or night, 7 days a week.</div></div>
+      <div class="faqitem rv"><div class="faqq">Do you work with contractors on new builds?<span class="faqico">+</span></div><div class="faqa">Yes. Derrick has extensive new construction experience and coordinates with GCs throughout every phase — rough-in to final trim. All work is inspection-ready.</div></div>
+      <div class="faqitem rv"><div class="faqq">What brands and materials do you work with?<span class="faqico">+</span></div><div class="faqa">We work with all major brands and materials — PEX, copper, CPVC, PVC, and more. We can source virtually any fixture brand and are happy to install customer-supplied fixtures.</div></div>
+      <div class="faqitem rv"><div class="faqq">Do you handle permits and inspections?<span class="faqico">+</span></div><div class="faqa">Yes. We handle the permit process and ensure all work meets Albany and Linn County code. Our work is designed to pass on the first visit — and it consistently does.</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════ CONTACT ═══════ -->
+<section id="contact">
+  <div class="contacti">
+    <div style="text-align:center;margin-bottom:64px" class="rv">
+      <span class="stag">Get In Touch</span>
+      <h2 class="sh2" style="text-align:center">Ready to get<br><em>started?</em></h2>
+      <p class="ssub" style="text-align:center;max-width:500px;margin:0 auto">Emergency or planned project — we're here. Reach Derrick directly or fill out the form.</p>
+    </div>
+    <div class="cg">
+      <div class="rvl">
+        <div class="ccc">
+          <a href="tel:5419747935" class="ccard"><div class="ccico cop">📞</div><div><div class="cct">Call Direct</div><div class="ccv">(541) 974-7935</div><div class="ccs">Best for emergencies &amp; quick questions</div></div></a>
+          <a href="sms:15419747935" class="ccard"><div class="ccico wat">💬</div><div><div class="cct">Text Us</div><div class="ccv">(541) 974-7935</div><div class="ccs">Send photos of the issue — we love texts</div></div></a>
+          <a href="mailto:northpointplumbingllc@gmail.com" class="ccard"><div class="ccico cop">✉️</div><div><div class="cct">Email</div><div class="ccv">northpointplumbingllc@gmail.com</div><div class="ccs">For quotes &amp; non-urgent inquiries</div></div></a>
+          <a href="https://www.facebook.com/northpointplumbingllc" class="ccard"><div class="ccico wat">👍</div><div><div class="cct">Facebook</div><div class="ccv">facebook.com/northpointplumbingllc</div><div class="ccs">Follow for updates &amp; project photos</div></div></a>
+        </div>
+        <div class="cemerg">
+          <div class="cemerg-t">🚨 Plumbing Emergency?</div>
+          <div class="cemerg-b">Don't wait — call <a href="tel:5419747935">(541) 974-7935</a> right now. Derrick's emergency line is active 24/7 and response is fast.</div>
+        </div>
+      </div>
+      <div class="rvr">
+        <div class="cform">
+          <div id="fInner">
+            <div class="cft">Get a Free Quote</div>
+            <div class="cfs">Fill this out and Derrick reaches out within a few hours — usually sooner.</div>
+            <div class="frow">
+              <div class="fg"><label>First Name</label><input type="text" placeholder="John"></div>
+              <div class="fg"><label>Last Name</label><input type="text" placeholder="Smith"></div>
+            </div>
+            <div class="fg"><label>Phone</label><input type="tel" placeholder="(541) 555-0000"></div>
+            <div class="fg"><label>Email</label><input type="email" placeholder="you@email.com"></div>
+            <div class="fg"><label>Service Needed</label>
+              <select><option value="">Select a service...</option><option>Home Remodel Plumbing</option><option>New Construction</option><option>Repair / Leak Fix</option><option>Fixture Installation</option><option>Water Heater Service</option><option>Emergency Plumbing</option><option>Other</option></select>
+            </div>
+            <div class="fg"><label>Describe Your Project</label><textarea placeholder="Tell us what's going on — you can also text photos to (541) 974-7935"></textarea></div>
+            <button class="fsub" onclick="submitForm()">Send Message → Get Free Quote</button>
+            <div class="fnote">We respond within 2–4 hours · No spam ever</div>
+          </div>
+          <div class="fsuccess" id="fSuccess">
+            <div class="fsico">🎉</div>
+            <div class="fst">Message Sent!</div>
+            <div class="fss">Thanks for reaching out to North Point Plumbing! Derrick will be in touch shortly.<br><br>For urgent issues, call <a href="tel:5419747935">(541) 974-7935</a> directly.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════ FINAL CTA ═══════ -->
+<section id="ctaf">
+  <div class="ctafbg"><div class="ctao1"></div><div class="ctao2"></div></div>
+  <div class="ctafl"></div>
+  <h2 class="ctah rv"><em>Got a problem?</em><br>Let's fix it.</h2>
+  <p class="ctasub rv">Call Albany's most trusted plumber — 25+ years of expert service, honest pricing, and work that's always guaranteed.</p>
+  <div class="ctabtns rv">
+    <a href="tel:5419747935" class="bp" style="font-size:17px;padding:19px 48px"><span>📞 (541) 974-7935 — Call Now</span></a>
+    <a href="sms:15419747935" class="bs" style="font-size:16px;padding:19px 40px">💬 Text Anytime</a>
+  </div>
+  <div class="ctanote rv">Licensed &amp; Insured · Albany, Oregon · 24/7 Emergency · Free Estimates</div>
+</section>
+
+<!-- ═══════ FOOTER ═══════ -->
+<footer>
+  <div class="footi">
+    <div class="footg">
+      <div>
+        <div class="fb-mark">N</div>
+        <div class="fb-name">NORTH POINT PLUMBING LLC</div>
+        <div class="fb-tag">Albany, Oregon's trusted plumbing company — proudly serving the Willamette Valley with integrity and mastery.</div>
+        <div class="fsocs">
+          <a class="fsoc" href="https://www.facebook.com/northpointplumbingllc">f</a>
+          <a class="fsoc" href="https://www.instagram.com/northpointplumbingllc">ig</a>
+          <a class="fsoc" href="https://share.google/jMtydXCsEVCUGDxNn">G</a>
+        </div>
+      </div>
+      <div class="fc"><h4>Services</h4><ul><li><a href="#svc">Home Remodels</a></li><li><a href="#svc">New Construction</a></li><li><a href="#svc">Repairs &amp; Service</a></li><li><a href="#svc">Fixture Installation</a></li><li><a href="#svc">Water Heaters</a></li><li><a href="#svc">Emergency 24/7</a></li></ul></div>
+      <div class="fc"><h4>Company</h4><ul><li><a href="#about">About Derrick</a></li><li><a href="#rev">Customer Reviews</a></li><li><a href="#proc">How It Works</a></li><li><a href="#areas">Service Areas</a></li><li><a href="#faq">FAQ</a></li></ul></div>
+      <div class="fc"><h4>Contact</h4><ul><li><a href="tel:5419747935">📞 (541) 974-7935</a></li><li><a href="sms:15419747935">💬 Text Us</a></li><li><a href="mailto:northpointplumbingllc@gmail.com">✉️ Email Us</a></li><li><a href="#contact">Free Quote Form</a></li></ul></div>
+    </div>
+    <div class="footb">
+      <div class="footc">© 2025 North Point Plumbing LLC · Albany, Oregon · All rights reserved.</div>
+      <div class="footl">Oregon Licensed &amp; Insured · <span>Derrick Hostetler, Owner</span></div>
+    </div>
+  </div>
+</footer>
+
+</div><!-- .page -->
+
+<script>
+// =====================================================================
+// LOADER
+// =====================================================================
+window.addEventListener('load',()=>{
+  setTimeout(()=>document.getElementById('loader').classList.add('out'),2600);
+});
+
+// =====================================================================
+// CURSOR
+// =====================================================================
+const cr=Object.assign(document.createElement('div'),{className:'cr'});
+const crr=Object.assign(document.createElement('div'),{className:'crr'});
+document.body.append(cr,crr);
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;cr.style.cssText+=`;left:${mx}px;top:${my}px`});
+(function ac(){rx+=(mx-rx)*0.12;ry+=(my-ry)*0.12;crr.style.cssText+=`;left:${rx}px;top:${ry}px`;requestAnimationFrame(ac)})();
+document.querySelectorAll('a,button,.sc,.rc,.hfs,.faqq').forEach(el=>{
+  el.addEventListener('mouseenter',()=>{cr.style.width='18px';cr.style.height='18px';crr.style.width='50px';crr.style.height='50px'});
+  el.addEventListener('mouseleave',()=>{cr.style.width='10px';cr.style.height='10px';crr.style.width='32px';crr.style.height='32px'});
+});
+
+// =====================================================================
+// NAV STICKY
+// =====================================================================
+window.addEventListener('scroll',()=>{
+  document.getElementById('nav').classList.toggle('stuck',window.scrollY>70);
+},{ passive:true });
+
+// =====================================================================
+// SCROLL REVEAL
+// =====================================================================
+const ro=new IntersectionObserver(e=>e.forEach(x=>{if(x.isIntersecting)x.target.classList.add('vis')}),{threshold:0.1,rootMargin:'0px 0px -40px 0px'});
+document.querySelectorAll('.rv,.rvl,.rvr,.sitem').forEach(el=>ro.observe(el));
+
+// =====================================================================
+// FAQ
+// =====================================================================
+document.querySelectorAll('.faqq').forEach(q=>{
+  q.addEventListener('click',()=>{
+    const item=q.parentElement,wasOpen=item.classList.contains('open');
+    document.querySelectorAll('.faqitem').forEach(i=>i.classList.remove('open'));
+    if(!wasOpen)item.classList.add('open');
+  });
+});
+
+// =====================================================================
+// FORM
+// =====================================================================
+function submitForm(){
+  const btn=document.querySelector('.fsub');
+  btn.textContent='Sending...';btn.style.opacity='0.7';
+  setTimeout(()=>{
+    document.getElementById('fInner').style.display='none';
+    document.getElementById('fSuccess').classList.add('show');
+  },1300);
+}
+
+// =====================================================================
+// COUNTER ANIMATION
+// =====================================================================
+const co=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(!e.isIntersecting)return;
+    const el=e.target.querySelector('.snum');
+    const target=+el.dataset.target;
+    const suffix=el.dataset.suffix||'';
+    let start=null;
+    (function step(ts){
+      if(!start)start=ts;
+      const p=Math.min((ts-start)/1800,1);
+      const ease=1-Math.pow(1-p,3);
+      el.textContent=Math.floor(ease*target)+suffix;
+      if(p<1)requestAnimationFrame(step);
+    })(performance.now());
+    co.unobserve(e.target);
+  });
+},{threshold:0.5});
+document.querySelectorAll('.sitem').forEach(el=>co.observe(el));
+
+// =====================================================================
+// PIPE CANVAS (2D widget)
+// =====================================================================
+const pc2=document.getElementById('pipeCanvas');
+if(pc2){
+  const ctx=pc2.getContext('2d');
+  const W=pc2.width,H=pc2.height;
+  const drops=Array.from({length:22},()=>({x:Math.random()*W,y:Math.random()*H,vy:0.9+Math.random()*1.6,r:1.5+Math.random()*2.5,o:0.25+Math.random()*0.55}));
+  const bubbles=Array.from({length:8},()=>({x:20+Math.random()*(W-40),y:H,vy:-(0.4+Math.random()*0.7),r:3+Math.random()*5,o:0.15+Math.random()*0.3,life:0,maxLife:80+Math.random()*80}));
+  let psiV=82,psiD=1,gpmV=3.2;
+  setInterval(()=>{psiV+=psiD*(Math.random()*1.2);if(psiV>86||psiV<79)psiD*=-1;const e=document.getElementById('psiV');if(e)e.textContent=Math.round(psiV)},450);
+  setInterval(()=>{gpmV=Math.max(2.8,Math.min(3.6,gpmV+(Math.random()-.5)*.06));const e=document.getElementById('gpmV');if(e)e.textContent=gpmV.toFixed(1)},600);
+  function drawPipe2(){
+    ctx.clearRect(0,0,W,H);
+    // grid
+    ctx.strokeStyle='rgba(58,159,216,0.07)';ctx.lineWidth=1;
+    for(let x=0;x<W;x+=30){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke()}
+    for(let y=0;y<H;y+=30){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke()}
+    // pipes
+    ctx.strokeStyle='rgba(30,127,196,0.25)';ctx.lineWidth=10;ctx.lineCap='round';
+    [H*.25,H*.5,H*.75].forEach(y=>{ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke()});
+    ctx.strokeStyle='rgba(184,116,42,0.18)';ctx.lineWidth=8;
+    [W*.33,W*.66].forEach(x=>{ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke()});
+    // drops
+    drops.forEach(d=>{
+      ctx.beginPath();ctx.arc(d.x,d.y,d.r,0,Math.PI*2);
+      ctx.fillStyle=`rgba(61,165,217,${d.o})`;ctx.fill();
+      d.y+=d.vy;if(d.y>H){d.y=0;d.x=Math.random()*W}
+    });
+    // bubbles
+    bubbles.forEach(b=>{
+      b.life++;b.y+=b.vy;b.x+=Math.sin(b.life*.1)*.4;
+      if(b.life>b.maxLife){b.life=0;b.y=H;b.x=20+Math.random()*(W-40)}
+      const alpha=b.o*(1-b.life/b.maxLife);
+      ctx.beginPath();ctx.arc(b.x,b.y,b.r,0,Math.PI*2);
+      ctx.strokeStyle=`rgba(184,116,42,${alpha})`;ctx.lineWidth=1;ctx.stroke();
+    });
+    requestAnimationFrame(drawPipe2);
+  }
+  drawPipe2();
+}
+
+// =====================================================================
+// THREE.JS — MAIN 3D SCENES
+// =====================================================================
+const cv=document.getElementById('cv');
+const renderer=new THREE.WebGLRenderer({canvas:cv,antialias:true,alpha:true});
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+renderer.setSize(innerWidth,innerHeight);
+
+const scene=new THREE.Scene();
+const cam=new THREE.PerspectiveCamera(55,innerWidth/innerHeight,0.1,1000);
+cam.position.set(0,0,6);
+
+const clock=new THREE.Clock();
+
+// ── G0: HERO ambient dust ──────────────────────────────
+const G0=new THREE.Group();
+const N0=2000;
+const p0a=new Float32Array(N0*3),p0c=new Float32Array(N0*3);
+for(let i=0;i<N0;i++){
+  p0a[i*3]=(Math.random()-.5)*28;p0a[i*3+1]=(Math.random()-.5)*16;p0a[i*3+2]=(Math.random()-.5)*10;
+  if(Math.random()>.55){p0c[i*3]=0.94;p0c[i*3+1]=0.69;p0c[i*3+2]=0.33}
+  else{p0c[i*3]=0.12;p0c[i*3+1]=0.5;p0c[i*3+2]=0.77}
+}
+const g0geo=new THREE.BufferGeometry();
+g0geo.setAttribute('position',new THREE.BufferAttribute(p0a,3));
+g0geo.setAttribute('color',new THREE.BufferAttribute(p0c,3));
+const g0mat=new THREE.PointsMaterial({size:0.022,vertexColors:true,transparent:true,opacity:0.5});
+G0.add(new THREE.Points(g0geo,g0mat));
+scene.add(G0);
+
+// ── G1: WATER FLOW — torus knot + flowing particles ────
+const G1=new THREE.Group();
+const tkGeo=new THREE.TorusKnotGeometry(1.5,0.10,200,14,2,3);
+const tkMat=new THREE.MeshBasicMaterial({color:0x1e7fc4,wireframe:true,transparent:true,opacity:0});
+G1.add(new THREE.Mesh(tkGeo,tkMat));
+// solid inner core
+const coreGeo=new THREE.TorusKnotGeometry(1.5,0.04,200,8,2,3);
+const coreMat=new THREE.MeshBasicMaterial({color:0x3a9fd8,transparent:true,opacity:0});
+G1.add(new THREE.Mesh(coreGeo,coreMat));
+// water particles along path
+const WN=400;const wPos=new Float32Array(WN*3);const wData=[];
+function tkPath(t){
+  const p=2,q=3,phi=t*Math.PI*2*p,theta=t*Math.PI*2*q;
+  const r=1.5+0.1*Math.cos(q*phi);
+  return new THREE.Vector3(r*Math.cos(phi),r*Math.sin(phi),0.1*Math.sin(q*phi)*2);
+}
+for(let i=0;i<WN;i++){wData.push({t:i/WN,s:0.003+Math.random()*.002,offset:Math.random()*.08-.04})}
+const wGeo=new THREE.BufferGeometry();
+const wAttr=new THREE.BufferAttribute(wPos,3);wAttr.setUsage(THREE.DynamicDrawUsage);wGeo.setAttribute('position',wAttr);
+const wMat=new THREE.PointsMaterial({color:0x3a9fd8,size:0.05,transparent:true,opacity:0});
+G1.add(new THREE.Points(wGeo,wMat));
+G1.visible=false;scene.add(G1);
+
+// ── G2: COPPER PIPE ORBITAL SYSTEM ─────────────────────
+const G2=new THREE.Group();
+const ringCols=[0xb8742a,0x1e7fc4,0xd4913e,0x3a9fd8,0xf0b054];
+const rings2=[];
+for(let i=0;i<5;i++){
+  const r=0.9+i*0.55;
+  const geo=new THREE.TorusGeometry(r,0.015,16,120);
+  const mat=new THREE.MeshBasicMaterial({color:ringCols[i],transparent:true,opacity:0});
+  const mesh=new THREE.Mesh(geo,mat);
+  mesh.rotation.x=i*0.7;mesh.rotation.y=i*0.5;
+  mesh.userData={bOp:0.6-i*.08,speed:(0.005-i*.0005)*(i%2?-1:1)};
+  rings2.push(mesh);G2.add(mesh);
+  // dots on ring
+  const dc=10+i*5;
+  for(let d=0;d<dc;d++){
+    const a=(d/dc)*Math.PI*2;
+    const dg=new THREE.SphereGeometry(0.04,8,8);
+    const dm=new THREE.MeshBasicMaterial({color:ringCols[i],transparent:true,opacity:0});
+    const dot=new THREE.Mesh(dg,dm);
+    dot.position.set(r*Math.cos(a),r*Math.sin(a),0);
+    dot.userData={ring:mesh,angle:a,sr:r,bOp:0.9-i*.1};
+    mesh.add(dot);
+  }
+}
+// central pulsing sphere
+const csg=new THREE.SphereGeometry(0.28,32,32);
+const csm=new THREE.MeshBasicMaterial({color:0xf0b054,transparent:true,opacity:0});
+G2.add(new THREE.Mesh(csg,csm));
+// outer copper tube stubs
+for(let i=0;i<6;i++){
+  const a=(i/6)*Math.PI*2;
+  const tg=new THREE.CylinderGeometry(0.025,0.025,0.7,10);
+  const tm=new THREE.MeshBasicMaterial({color:0xb8742a,transparent:true,opacity:0});
+  const t=new THREE.Mesh(tg,tm);
+  t.position.set(3.5*Math.cos(a),.5*Math.sin(a),0);t.rotation.z=a+Math.PI/2;
+  t.userData={isTube:true};G2.add(t);
+}
+G2.visible=false;scene.add(G2);
+
+// ── G3: DNA / PIPE HELIX ────────────────────────────────
+const G3=new THREE.Group();
+const HN2=140;
+for(let i=0;i<HN2;i++){
+  const t=i/HN2,angle=t*Math.PI*12,y=(t-.5)*8,r=1.4;
+  const sg=new THREE.SphereGeometry(0.075,10,10);
+  const am=new THREE.MeshBasicMaterial({color:0xcc8c3a,transparent:true,opacity:0});
+  const bm=new THREE.MeshBasicMaterial({color:0x1e7fc4,transparent:true,opacity:0});
+  const a=new THREE.Mesh(sg,am);a.position.set(r*Math.cos(angle),y,r*Math.sin(angle));G3.add(a);
+  const b=new THREE.Mesh(sg.clone(),bm);b.position.set(r*Math.cos(angle+Math.PI),y,r*Math.sin(angle+Math.PI));G3.add(b);
+  if(i%5===0){
+    const rg=new THREE.CylinderGeometry(0.01,0.01,r*2,8);
+    const rm=new THREE.MeshBasicMaterial({color:0x3a9fd8,transparent:true,opacity:0});
+    const rng=new THREE.Mesh(rg,rm);rng.position.set(0,y,0);rng.rotation.z=Math.PI/2;rng.rotation.y=-angle;G3.add(rng);
+  }
+}
+G3.visible=false;scene.add(G3);
+
+// ── G4: RIPPLE GRID ─────────────────────────────────────
+const G4=new THREE.Group();
+const GS=56;const gv=[],gi=[],goff=[];
+for(let i=0;i<GS;i++)for(let j=0;j<GS;j++){gv.push((i-GS/2)*.2,0,(j-GS/2)*.2);goff.push(i,j)}
+for(let i=0;i<GS-1;i++)for(let j=0;j<GS-1;j++){const a=i*GS+j;gi.push(a,a+1,a+GS,a+1,a+GS+1,a+GS)}
+const g4geo=new THREE.BufferGeometry();
+const g4pa=new THREE.BufferAttribute(new Float32Array(gv),3);g4pa.setUsage(THREE.DynamicDrawUsage);
+g4geo.setAttribute('position',g4pa);g4geo.setIndex(gi);
+const g4mat=new THREE.MeshBasicMaterial({color:0x1e7fc4,transparent:true,opacity:0,wireframe:true});
+const g4mesh=new THREE.Mesh(g4geo,g4mat);g4mesh.rotation.x=-.28;G4.add(g4mesh);
+G4.visible=false;scene.add(G4);
+
+// ── SCROLL / LERP ────────────────────────────────────────
+let sY=0,tSY=0;
+window.addEventListener('scroll',()=>tSY=window.scrollY,{passive:true});
+
+function getAlpha(id){
+  const el=document.getElementById(id);if(!el)return 0;
+  const r=el.getBoundingClientRect(),vh=innerHeight;
+  const cx=r.top+r.height/2,d=Math.abs(cx-vh/2);
+  return Math.max(0,1-d/(vh*.75));
+}
+
+// ── RENDER LOOP ───────────────────────────────────────────
+renderer.setAnimationLoop(()=>{
+  const t=clock.getElapsedTime();
+  sY+=(tSY-sY)*.07;
+  const a0=Math.max(0,1-sY/(innerHeight*.9));
+  const a1=getAlpha('cs1');
+  const a2=getAlpha('cs2');
+  const a3=getAlpha('cs3');
+  const a4=getAlpha('cs4');
+
+  // G0 hero dust
+  g0mat.opacity=a0*.5;
+  G0.rotation.y=t*.03;G0.rotation.x=t*.015;
+
+  // G1 torus knot flow
+  G1.visible=a1>.01;
+  tkMat.opacity=a1*.4;coreMat.opacity=a1*.6;wMat.opacity=a1*.9;
+  wData.forEach((w,i)=>{
+    w.t=(w.t+w.s)%1;
+    const pos=tkPath(w.t);
+    wAttr.setXYZ(i,pos.x+w.offset,pos.y+w.offset,pos.z);
+  });
+  wAttr.needsUpdate=true;
+  G1.rotation.y=t*.07;G1.rotation.x=Math.sin(t*.12)*.3;
+
+  // G2 rings
+  G2.visible=a2>.01;
+  rings2.forEach(r=>{
+    r.rotation.z+=r.userData.speed;r.rotation.x+=r.userData.speed*.4;
+    r.material.opacity=a2*r.userData.bOp;
+    r.children.forEach(dot=>{
+      if(dot.isMesh)dot.material.opacity=a2*(dot.userData.bOp||.85);
+    });
+  });
+  G2.children.forEach(c=>{
+    if(c.isMesh&&c.geometry.type==='SphereGeometry')c.material.opacity=a2*(0.5+Math.sin(t*2)*.15);
+    if(c.isMesh&&c.userData.isTube)c.material.opacity=a2*.35;
+  });
+  G2.rotation.y=t*.07;
+
+  // G3 helix
+  G3.visible=a3>.01;
+  G3.rotation.y=t*.16;
+  G3.children.forEach(c=>{
+    if(c.isMesh){const base=c.material.color.b>.5?.85:.85;c.material.opacity=a3*base}
+  });
+
+  // G4 wave grid
+  G4.visible=a4>.01;
+  g4mat.opacity=a4*.32;
+  if(a4>.01){
+    const pa=g4geo.attributes.position;
+    for(let i=0;i<GS;i++)for(let j=0;j<GS;j++){
+      const idx=i*GS+j;
+      const w=Math.sin(i*.3+t*1.3)*Math.cos(j*.3+t*1.0)*.55
+             +Math.sin(i*.18+t*.7)*.22
+             +Math.cos(j*.22+t*.9)*.18;
+      pa.setY(idx,w);
+    }
+    pa.needsUpdate=true;
+  }
+  G4.rotation.y=t*.04;
+
+  cam.position.x=Math.sin(t*.16)*.35;
+  cam.position.y=Math.cos(t*.13)*.2;
+  cam.lookAt(0,0,0);
+  renderer.render(scene,cam);
+});
+
+window.addEventListener('resize',()=>{
+  cam.aspect=innerWidth/innerHeight;cam.updateProjectionMatrix();
+  renderer.setSize(innerWidth,innerHeight);
+});
+</script>
+</body>
+</html>
